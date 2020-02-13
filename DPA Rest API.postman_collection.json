@@ -1,0 +1,719 @@
+{
+	"info": {
+		"_postman_id": "01134e53-66c1-4089-a504-e427eb95b1f3",
+		"name": "DPA Rest API",
+		"description": "DPA REST API Demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01 Generate Backup Report Summary",
+			"item": [
+				{
+					"name": "01 - Get-Get Backup Server Node ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "06f183f0-ec80-4e77-933d-62ba31bb9571",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"\r",
+									"//get the total number of record\r",
+									"var recordCount = parseInt(responseData.nodes.$.totalRecords)\r",
+									"\r",
+									"\r",
+									"//get id if type is host for backup server\r",
+									"for (var i =0; i <recordCount; i++ ){\r",
+									"    if (responseData.nodes.node[i].$.type == \"Host\"){\r",
+									"        pm.environment.set(\"dpa_object_id\", responseData.nodes.node[0].id);\r",
+									"    }\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6794fa82-f2cb-4e81-a365-a616d02517a0",
+								"exec": [
+									"pm.environment.set(\"hostname\", \"dpd-ny-nw9\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.emc.apollo-v1+xml",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/apollo-api/nodes/?query=name%3d{{hostname}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"apollo-api",
+								"nodes",
+								""
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "name%3d{{hostname}}"
+								}
+							]
+						},
+						"description": "Get Backup Server Node ID"
+					},
+					"response": []
+				},
+				{
+					"name": "02 - Post - Backup Job Summary Report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5ba52f7b-14d4-4bf2-8cee-47f3b87d47b3",
+								"exec": [
+									"pm.environment.set(\"report_name\", \"Backup Job Summary\");",
+									"pm.environment.set(\"duration\", \"Last Day\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "54530bb7-bcfb-46db-b352-ea30d7ab0db2",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"//generate report link\r",
+									"pm.environment.set(\"report_link\", responseData.report.link);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>"
+						},
+						"url": {
+							"raw": "{{url}}/dpa-api/report",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dpa-api",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03 - Get - Download Backup Job Summary Report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5ba52f7b-14d4-4bf2-8cee-47f3b87d47b3",
+								"exec": [
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7d1cc06-b346-4607-b3a0-79c08d4bd088",
+								"exec": [
+									"//clean up variables",
+									"pm.environment.unset(\"hostname\");",
+									"pm.environment.unset(\"dpa_object_id\")",
+									"pm.environment.unset(\"report_name\");",
+									"pm.environment.unset(\"duration\");",
+									"pm.environment.unset(\"report_link\");",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>"
+						},
+						"url": {
+							"raw": "{{report_link}}",
+							"host": [
+								"{{report_link}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "02 Generate Backup Failed Jobs",
+			"item": [
+				{
+					"name": "01 - Get-Get Backup Server Node ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "06f183f0-ec80-4e77-933d-62ba31bb9571",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"\r",
+									"//get the total number of record\r",
+									"var recordCount = parseInt(responseData.nodes.$.totalRecords)\r",
+									"\r",
+									"\r",
+									"//get id if type is host for backup server\r",
+									"for (var i =0; i <recordCount; i++ ){\r",
+									"    if (responseData.nodes.node[i].$.type == \"Host\"){\r",
+									"        pm.environment.set(\"dpa_object_id\", responseData.nodes.node[0].id);\r",
+									"    }\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6794fa82-f2cb-4e81-a365-a616d02517a0",
+								"exec": [
+									"pm.environment.set(\"hostname\", \"dpd-ny-nw9\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.emc.apollo-v1+xml",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/apollo-api/nodes/?query=name%3d{{hostname}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"apollo-api",
+								"nodes",
+								""
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "name%3d{{hostname}}"
+								}
+							]
+						},
+						"description": "Get Backup Server Node ID"
+					},
+					"response": []
+				},
+				{
+					"name": "02 - Post - Generate Backup Failed Jobs Report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5ba52f7b-14d4-4bf2-8cee-47f3b87d47b3",
+								"exec": [
+									"pm.environment.set(\"report_name\", \"Backup Failed Jobs\");",
+									"pm.environment.set(\"duration\", \"Last Month\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "54530bb7-bcfb-46db-b352-ea30d7ab0db2",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"//generate report link\r",
+									"pm.environment.set(\"report_link\", responseData.report.link);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>"
+						},
+						"url": {
+							"raw": "{{url}}/dpa-api/report",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dpa-api",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03 - Get - Download Backup Failed Jobs Report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5ba52f7b-14d4-4bf2-8cee-47f3b87d47b3",
+								"exec": [
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7d1cc06-b346-4607-b3a0-79c08d4bd088",
+								"exec": [
+									"//clean up variables",
+									"pm.environment.unset(\"hostname\");",
+									"pm.environment.unset(\"dpa_object_id\")",
+									"pm.environment.unset(\"report_name\");",
+									"pm.environment.unset(\"duration\");",
+									"pm.environment.unset(\"report_link\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>"
+						},
+						"url": {
+							"raw": "{{report_link}}",
+							"host": [
+								"{{report_link}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "03 Generate DD Utilization",
+			"item": [
+				{
+					"name": "01 - Get-Get Data Domain Node ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "06f183f0-ec80-4e77-933d-62ba31bb9571",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"\r",
+									"//get the total number of record\r",
+									"var recordCount = parseInt(responseData.nodes.$.totalRecords)\r",
+									"\r",
+									"\r",
+									"//Get id if type is DataDomain for DD\r",
+									"for (var i =0; i <recordCount; i++ ){\r",
+									"    if (responseData.nodes.node[i].$.type == \"DataDomain\"){\r",
+									"        pm.environment.set(\"dpa_object_id\", responseData.nodes.node[0].id);\r",
+									"    }\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6794fa82-f2cb-4e81-a365-a616d02517a0",
+								"exec": [
+									"pm.environment.set(\"hostname\", \"dd140s1\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/apollo-api/nodes/?query=name%3d{{hostname}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"apollo-api",
+								"nodes",
+								""
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "name%3d{{hostname}}"
+								}
+							]
+						},
+						"description": "Get Data Domain Node ID"
+					},
+					"response": []
+				},
+				{
+					"name": "02 - Post- Generate DD Utilization Report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5ba52f7b-14d4-4bf2-8cee-47f3b87d47b3",
+								"exec": [
+									"pm.environment.set(\"report_name\", \"Data Domain Tier Utilization\");",
+									"pm.environment.set(\"duration\", \"Last Day\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "b8c046b6-dbdc-4300-8ca0-d6972a7c832e",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"//generate report link\r",
+									"pm.environment.set(\"report_link\", responseData.report.link);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.emc.apollo-v1+xml",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>"
+						},
+						"url": {
+							"raw": "{{url}}/dpa-api/report",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dpa-api",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03 - Get - Download DD Utilization Report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "5ba52f7b-14d4-4bf2-8cee-47f3b87d47b3",
+								"exec": [
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "b3018465-304e-442b-998e-764982f39600",
+								"exec": [
+									"//clean up variables",
+									"pm.environment.unset(\"hostname\");",
+									"pm.environment.unset(\"dpa_object_id\")",
+									"pm.environment.unset(\"report_name\");",
+									"pm.environment.unset(\"duration\");",
+									"pm.environment.unset(\"report_link\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>"
+						},
+						"url": {
+							"raw": "{{report_link}}",
+							"host": [
+								"{{report_link}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "abf1b25a-3ae1-434c-8281-87a48913e245",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0f01e3b4-8c32-4cf1-b7ee-25053667e423",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
