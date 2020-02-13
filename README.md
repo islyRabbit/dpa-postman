@@ -22,6 +22,8 @@ The REST API flow as follow:
 2. Post Request - Generate Report
 3. Get Request - Download Report
 
+![]{images/DPA%20Flow.png}
+
 #Prequisites#
 
 To use the postman you will need to modify the following in the environment variable:
