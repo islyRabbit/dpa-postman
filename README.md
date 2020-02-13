@@ -32,7 +32,7 @@ Postman Request
  ![](images/sample-request.PNG)
 
 To use the postman you will need to modify the following in the environment variable:
-- url - The https://<DPA Server IP>:9002
+- url - The https://DPA Server IP:9002
 - user_name - the credential you are using
   ![](images/Env-variable.PNG)
   
