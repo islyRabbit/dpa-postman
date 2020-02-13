@@ -30,6 +30,7 @@ To use the postman you will need to modify the following in the environment vari
 In each request under Authorization, you will need to modify to the password you are using.
 
 To modify the hostname go to the request's pre-request of the "01-xxxxx" request
+
 To modfiy the report type go to the request's pre-request of the "02-xxxx" request
 
 Run the request in the following sequence 01-Get-xxxx > 02-Post-xxxx > 03-Get-xxxx
