@@ -22,18 +22,25 @@ The REST API flow as follow:
 2. Post Request - Generate Report
 3. Get Request - Download Report
 
-![]{images/DPA%20Flow.png}
+![](images/DPA%20Flow.png)
 
-#Prequisites#
+Postman Request
+ ![](images/sample-request.PNG)
 
 To use the postman you will need to modify the following in the environment variable:
 - url - The https://<DPA Server IP>:9002
 - user_name - the credential you are using
+  ![](images/Env-variable.PNG)
   
 In each request under Authorization, you will need to modify to the password you are using.
+  ![](images/Password.PNG)
 
 To modify the hostname go to the request's pre-request of the "01-xxxxx" request
+  ![](images/Pre-Request-Hostname.PNG)
 
 To modfiy the report type go to the request's pre-request of the "02-xxxx" request
-
+  ![](images/Pre-Request-Report-Name.PNG)
+  
 Run the request in the following sequence 01-Get-xxxx > 02-Post-xxxx > 03-Get-xxxx
+![](images/sample-output.PNG)
+
