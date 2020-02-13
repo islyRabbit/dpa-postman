@@ -23,6 +23,7 @@ The REST API flow as follow:
 3. Get Request - Download Report
 
 #Prequisites#
+
 To use the postman you will need to modify the following in the environment variable:
 - url - The https://<DPA Server IP>:9002
 - user_name - the credential you are using
