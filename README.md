@@ -17,6 +17,10 @@ To get any report in DPA, you will need the following
 2. Report Name
 3. Expected Duration
 
+Tutorial example:
+1. https://www.youtube.com/watch?v=iKvIuIvZP2E
+2. https://www.youtube.com/watch?v=SNIgTPpFrpw
+
 The REST API flow as follow:
 1. Get Request - DPA Object ID
 2. Post Request - Generate Report
