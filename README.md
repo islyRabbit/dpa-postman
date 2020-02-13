@@ -9,7 +9,7 @@ Dell EMC Data Protection Advisor (DPA) offers:
 
 With its rich REST API capability, backup reporting can be extended to organisation’s workflow, such as chatbot, predictive analytics, and configuration management reporting.
 
-Example the following:
+Example:
 https://www.linkedin.com/pulse/self-service-backup-reporting-chatbot-eng-li-jwee/
 
 To get any report in DPA, you will need the following
