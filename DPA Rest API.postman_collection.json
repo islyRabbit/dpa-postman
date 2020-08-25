@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "01134e53-66c1-4089-a504-e427eb95b1f3",
+		"_postman_id": "511089d0-bf79-4530-9a50-6bdf4b51e70a",
 		"name": "DPA Rest API",
 		"description": "DPA REST API Demo",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -483,10 +483,17 @@
 									"\r",
 									"\r",
 									"//Get id if type is DataDomain for DD\r",
-									"for (var i =0; i <recordCount; i++ ){\r",
-									"    if (responseData.nodes.node[i].$.type == \"DataDomain\"){\r",
-									"        pm.environment.set(\"dpa_object_id\", responseData.nodes.node[0].id);\r",
+									"if (recordCount > 1){\r",
+									"    for (var i =0; i <recordCount; i++ ){\r",
+									"        console.log(responseData.nodes.node[i])\r",
+									"        if (responseData.nodes.node[i].$.type == \"DataDomain\"){\r",
+									"            postman.setEnvironmentVariable(\"dpa_object_id\", responseData.nodes.node[0].id);\r",
+									"        }\r",
 									"    }\r",
+									"}\r",
+									"else{\r",
+									"    postman.setEnvironmentVariable(\"dpa_object_id\", responseData.nodes.node.id);\r",
+									"\r",
 									"}\r",
 									""
 								],
@@ -705,6 +712,269 @@
 					"listen": "test",
 					"script": {
 						"id": "0f01e3b4-8c32-4cf1-b7ee-25053667e423",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "04 Generate DD Disk Configuration",
+			"item": [
+				{
+					"name": "01 - Get-Get Data Domain Node ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b7d13fe0-26c5-4ae9-95e1-b850a4e9b3e8",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"\r",
+									"//get the total number of record\r",
+									"var recordCount = parseInt(responseData.nodes.$.totalRecords)\r",
+									"\r",
+									"\r",
+									"//Get id if type is DataDomain for DD\r",
+									"if (recordCount > 1){\r",
+									"    for (var i =0; i <recordCount; i++ ){\r",
+									"        console.log(responseData.nodes.node[i])\r",
+									"        if (responseData.nodes.node[i].$.type == \"DataDomain\"){\r",
+									"            postman.setEnvironmentVariable(\"dpa_object_id\", responseData.nodes.node[0].id);\r",
+									"        }\r",
+									"    }\r",
+									"}\r",
+									"else{\r",
+									"    postman.setEnvironmentVariable(\"dpa_object_id\", responseData.nodes.node.id);\r",
+									"\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "2424b35a-5a6b-4aea-b840-fd69dbee2a01",
+								"exec": [
+									"pm.environment.set(\"hostname\", \"dd140s1\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/apollo-api/nodes/?query=name%3d{{hostname}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"apollo-api",
+								"nodes",
+								""
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "name%3d{{hostname}}"
+								}
+							]
+						},
+						"description": "Get Data Domain Node ID"
+					},
+					"response": []
+				},
+				{
+					"name": "02 - Post- Generate Disk Configuration",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "2a0d475e-bff0-43c3-ba67-f543d9e03842",
+								"exec": [
+									"pm.environment.set(\"report_name\", \"Data Domain Tier Utilization\");",
+									"pm.environment.set(\"duration\", \"Last Day\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "5ad6a464-2019-4e26-9a93-fb5e338e4ca2",
+								"exec": [
+									"//convert xml output to json\r",
+									"var responseData = xml2Json(responseBody);\r",
+									"//generate report link\r",
+									"pm.environment.set(\"report_link\", responseData.report.link);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.emc.apollo-v1+xml",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/dpa-api/report",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dpa-api",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03 - Get - Download DD Disk Configuration Report",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "9fef5f97-975e-4ad1-a0d9-74b6685d0cf9",
+								"exec": [
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "5dad1046-b86c-4aa0-84c4-28cad0d53022",
+								"exec": [
+									"//clean up variables",
+									"pm.environment.unset(\"hostname\");",
+									"pm.environment.unset(\"dpa_object_id\")",
+									"pm.environment.unset(\"report_name\");",
+									"pm.environment.unset(\"duration\");",
+									"pm.environment.unset(\"report_link\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_name}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "administrator",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/vnd.emc.apollo-v1+xml"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<runReportParameters>\r\n<report>\r\n<name>{{report_name}}</name> <!-- Report template name -->\r\n</report>\r\n<nodes>\r\n<node>\r\n<id>{{dpa_object_id}}</id> <!-- scope - node id of the Host -->\r\n                    </node>\r\n                </nodes>\r\n                <timeConstraints type=\"window\">\r\n                    <window>\r\n                        <name>{{duration}}</name> <!-- time period name -->\r\n                    </window>\r\n                </timeConstraints>\r\n                <formatParameters>\r\n                    <formatType>CSV</formatType> <!-- format type, could be CSV, HTML, PDF, IMAGE, XML. -->\r\n                </formatParameters>\r\n            </runReportParameters>",
+							"options": {
+								"raw": {}
+							}
+						},
+						"url": {
+							"raw": "{{report_link}}",
+							"host": [
+								"{{report_link}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e5925400-4ead-4d9a-b4fe-652867a1bc82",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "6395dc2c-4754-4ce0-bc8c-e5f85762a573",
 						"type": "text/javascript",
 						"exec": [
 							""
